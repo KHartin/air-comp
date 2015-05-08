@@ -41,6 +41,7 @@ for (i in v){
 
 am.site <- summaryBy(as.formula(this.formula), data=X, id = "village", keep.names=TRUE, FUN=mean)
 
+
 #Summary By ####
 install.packages("doBy")
 library(doBy)
