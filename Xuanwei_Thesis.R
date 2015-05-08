@@ -2,6 +2,9 @@
 
 
 
+#Install Packages for analysis
+install.packages("doBy")
+library(doBy)
 
 #Load dataset, exclude Xuanwei, view table
 #From UW
@@ -40,11 +43,6 @@ for (i in v){
 }
 
 am.site <- summaryBy(as.formula(this.formula), data=X, id = "village", keep.names=TRUE, FUN=mean)
-
-
-#Summary By
-install.packages("doBy")
-library(doBy)
 
 #gm = function(x, na.rm=TRUE){
   #exp(sum(log(x[x > 0]), na.rm=na.rm) / length(x))
