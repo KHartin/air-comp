@@ -3,7 +3,7 @@
 Xuanwei_ForAnalysis_31Mar15 <- read.csv("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv")
 X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 #detach(X)
-attach(X)
+#attach(X)
 
 #From Surface
 #?
