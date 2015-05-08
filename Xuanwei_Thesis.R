@@ -1,3 +1,8 @@
+##Need to have code that draws individual .csv files into one file
+
+
+
+
 #Load dataset, exclude Xuanwei, view table
 #From UW
 Xuanwei_ForAnalysis_31Mar15 <- read.csv("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv")
@@ -5,14 +10,9 @@ X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 #detach(X)
 #attach(X)
 
-#From Surface
-#?
-
-#Mass balance
-
 ###Data reduction
 
-## Reduce number of metals to thos with at least 10 greater than 2*Unc
+## Reduce number of metals to those with at least 10 greater than 2*Unc
 
 grepl("Unc",names(X))
 metals.unc <- names(X)[grepl("Unc",names(X))]
@@ -42,7 +42,7 @@ for (i in v){
 am.site <- summaryBy(as.formula(this.formula), data=X, id = "village", keep.names=TRUE, FUN=mean)
 
 
-#Summary By ####
+#Summary By
 install.packages("doBy")
 library(doBy)
 
@@ -52,16 +52,16 @@ library(doBy)
 
 gm_site <- summaryBy(conc ~location + sitenum, data=X, id = "village", keep.names=TRUE, FUN=gm)
 
-##Create new objects -> Home, Ambient, Mean and Geometric Mean Home Concentrations ####
+##Create new objects -> Home, Ambient, Mean and Geometric Mean Home Concentrations 
 
 is.home <- subset(X, location == "Home")
 is.ambient <- subset(X, location == "Ambient")
 
 ##Plots of Conc by Site Differentiating Indoor and Outdoor 
 
-#Arithmetic Mean of Indoor and Dup Samples Showing Mean and Median of Indoor and Ambient ####
+#Arithmetic Mean of Indoor and Dup Samples Showing Mean and Median of Indoor and Ambient 
 
-plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
+plot(X$conc~X$sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
      main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
 points(ho_avgmeans_x,col=1,pch=19)
 points(am_avgmeans_x,col=8,pch=15)
@@ -72,7 +72,7 @@ abline(h=median(ho_avgmeans_x), lty=5, col=1)
 abline(h=mean(am_avgmeans_x), lty=3, col=8)
 abline(h=median(am_avgmeans_x), lty=4, col=8)
 
-#Geometric Mean of Indoor and Dup Samples by Site Showing Geometric Mean and Median of Indoor and Ambient#### 
+#Geometric Mean of Indoor and Dup Samples by Site Showing Geometric Mean and Median of Indoor and Ambient
 
 plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
      main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
@@ -85,7 +85,7 @@ abline(h=median(ho_gmeans_x), lty=5, col=1)
 abline(h=mean(am_gmeans_x), lty=3, col=8)
 abline(h=median(am_gmeans_x), lty=4, col=8)
 
-#Geometric Mean of Indoor and Dup Samples by Site Showing NAAQS 24hr (35 ug/m3)####
+#Geometric Mean of Indoor and Dup Samples by Site Showing NAAQS 24hr (35 ug/m3)
 plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
      main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
 points(ho_gmeans_x,col=1,pch=19)
@@ -94,7 +94,7 @@ abline(h=35, lty=4, col=1)
 legend("topright", c("Indoor","Ambient","NAAQS 35 ug/m^3"),col=c(1,8,1),
        pch=c(19,15,NA),lty=c(NA,NA,4))
 
-#GM of Indoor and Dup Samples by Village Showing NAAQS 24hr (35 ug/m3)####
+#GM of Indoor and Dup Samples by Village Showing NAAQS 24hr (35 ug/m3)
 
 install.packages('beeswarm')
 library(beeswarm)
@@ -115,7 +115,7 @@ ratio_site <- summaryBy(conc~location + sitenum, data=gm_site, id = "village", k
 #library(car)
 #scatterplot(conc~sitenum | location, data=gm_site)
 
-#Scatter plot of log indoor vs outdoor ####
+#Scatter plot of log indoor vs outdoor 
 
 lm_byloc <- lm(gm_site$conc[gm_site$location=="Ambient"]~gm_site$conc[gm_site$location=="Home"])
 plot(gm_site$conc[gm_site$location=="Home"], gm_site$conc[gm_site$location=="Ambient"], log = "xy", 
@@ -128,7 +128,7 @@ legend("topright", bty="O", legend=paste("R2 is",format(summary(lm_byloc)$adj.r.
 #lines(lowess(gm_site$conc[gm_site$location=="Home"], gm_site$conc[gm_site$location=="Ambient"]),
       col="blue") # lowess line (x,y)
 
-#Scatter plot of indoor vs outdoor ####
+#Scatter plot of indoor vs outdoor 
 
 plot(gm_site$conc[gm_site$location=="Home"], gm_site$conc[gm_site$location=="Ambient"], 
      main = expression(paste("Indoor vs Outdoor ",PM[2.5]," Conc", sep = "")),
