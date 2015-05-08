@@ -7,30 +7,52 @@ output: html_document
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Load the required packages
 
 ```{r}
-summary(cars)
+pkgs <- c("knitr", "XLConnect")
+for (pkg in pkgs) {
+    if (! require(pkg, character.only=T)) { 
+        install.packages(pkg, repos="http://cran.fhcrc.org", dependencies=TRUE)
+        suppressPackageStartupMessages(library(pkg))
+    }
+}
 ```
 
-You can also embed plots, for example:
+Configure knitr options
 
-```{r, echo=FALSE}
-plot(cars)
+```{r}
+opts_chunk$set(tidy=FALSE, cache=FALSE)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Create the data folder
 
-Prepare files for SQL by cleaning up excel files and exposrting to .csv files
+```{r}
+datadir <- "data"
+dir.create(file.path(datadir), showWarnings=FALSE, recursive=TRUE)
+```
+
+Import XLSX worksheets
+
+```{r}
+datafile <- 'fluoride-data.xlsx'
+datafileout <- paste(c(datadir, '/', datafile), sep='', collapse='')
+```
+
+
+
+
 
 
 Upload the dataset, exclude results from Xuanwei city, view table
+
 ```{r}
 Xuanwei_ForAnalysis_31Mar15 <- read.csv("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv")
 X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 ```
 
 Reduce number of metals to those with at least 10 greater than 2*Unc
+
 ```{r}
 grepl("Unc",names(X))
 metals.unc <- names(X)[grepl("Unc",names(X))]
