@@ -10,7 +10,6 @@ X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 
 #Mass balance
 
-
 ###Data reduction
 
 ## Reduce number of metals to thos with at least 10 greater than 2*Unc
@@ -41,9 +40,6 @@ for (i in v){
 }
 
 am.site <- summaryBy(as.formula(this.formula), data=X, id = "village", keep.names=TRUE, FUN=mean)
-
-
-
 
 #Summary By ####
 install.packages("doBy")
