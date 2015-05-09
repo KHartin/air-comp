@@ -32,16 +32,21 @@ datadir <- "data"
 dir.create(file.path(datadir), showWarnings=FALSE, recursive=TRUE)
 ```
 
-Import XLSX worksheets
+Identify Worksheet
 
 ```{r}
-datafile <- 'fluoride-data.xlsx'
+datafile <- 'Batch AA results.xlsx'
 datafileout <- paste(c(datadir, '/', datafile), sep='', collapse='')
 ```
 
+Import worksheet (Need to repeat for each dataset)
+```{r}
+library(XLConnect)
+XRF <- readWorksheetFromFile(datafileout, sheet=1, header=TRUE,
+                                  startRow=8, endRow=46)
+```
 
-
-
+Remove unwanted Columns from XRF
 
 
 Upload the dataset, exclude results from Xuanwei city, view table
