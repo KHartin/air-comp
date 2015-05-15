@@ -1,5 +1,5 @@
 ---
-title: "Xuanwei_Thesis"
+title: "PM Composition in Rural Yunan Province China"
 author: "Kris Hartin"
 date: "May 8, 2015"
 output: html_document
@@ -7,27 +7,63 @@ output: html_document
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Load the required packages
 
 ```{r}
-summary(cars)
+pkgs <- c("knitr", "XLConnect")
+for (pkg in pkgs) {
+    if (! require(pkg, character.only=T)) { 
+        install.packages(pkg, repos="http://cran.fhcrc.org", dependencies=TRUE)
+        suppressPackageStartupMessages(library(pkg))
+    }
+}
 ```
 
-You can also embed plots, for example:
+Configure knitr options
 
-```{r, echo=FALSE}
-plot(cars)
+```{r}
+opts_chunk$set(tidy=FALSE, cache=FALSE)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Create the data folder
+
+```{r}
+datadir <- "data"
+dir.create(file.path(datadir), showWarnings=FALSE, recursive=TRUE)
+```
+
+Identify Worksheet
+
+```{r}
+datafile <- 'Batch AA results.xlsx'
+datafileout <- paste(c(datadir, '/', datafile), sep='', collapse='')
+```
+
+Import worksheet (Need to repeat for each dataset)
+```{r}
+library(XLConnect)
+XRF <- readWorksheetFromFile(datafileout, sheet=1, header=TRUE,
+                                  startRow=8, endRow=46)
+```
+
+Remove unwanted Columns from XRF
+
 
 Upload the dataset, exclude results from Xuanwei city, view table
+<<<<<<< HEAD
+=======
+
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 ```{r}
 Xuanwei_ForAnalysis_31Mar15 <- read.csv("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv")
 X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 ```
 
 Reduce number of metals to those with at least 10 greater than 2*Unc
+<<<<<<< HEAD
+=======
+
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 ```{r}
 grepl("Unc",names(X))
 metals.unc <- names(X)[grepl("Unc",names(X))]
@@ -44,7 +80,12 @@ for(i in 1:length(names(X))){
 ```
 
 Calculate arithmetic mean of data by site
+<<<<<<< HEAD
 ```{r}
+=======
+```{R}
+library(doBy)
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 v<-c(v,names(X)[grepl("ugV",names(X))])
 
 this.formula <- as.character("conc~location + sitenum")  
