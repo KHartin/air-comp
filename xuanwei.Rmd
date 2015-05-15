@@ -50,14 +50,20 @@ Remove unwanted Columns from XRF
 
 
 Upload the dataset, exclude results from Xuanwei city, view table
+<<<<<<< HEAD
+=======
 
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 ```{r}
 Xuanwei_ForAnalysis_31Mar15 <- read.csv("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv")
 X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 ```
 
 Reduce number of metals to those with at least 10 greater than 2*Unc
+<<<<<<< HEAD
+=======
 
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 ```{r}
 grepl("Unc",names(X))
 metals.unc <- names(X)[grepl("Unc",names(X))]
@@ -74,8 +80,12 @@ for(i in 1:length(names(X))){
 ```
 
 Calculate arithmetic mean of data by site
+<<<<<<< HEAD
+```{r}
+=======
 ```{R}
 library(doBy)
+>>>>>>> 39c310c11e81dfa68b8fc9e1136d68e6a9fc331a
 v<-c(v,names(X)[grepl("ugV",names(X))])
 
 this.formula <- as.character("conc~location + sitenum")  
