@@ -2,9 +2,10 @@
 # Packages Needed to Complete this Analysis #
 # - - - - - - - - - - - - - - - - - - - - - #
 
-#packages <- c("doBy", "psych", "beswarm")
-#library(packages)
-#Import each origin .csv file excluding unnessesary rows and columns and export each as 'cleaned' dataset SECTION ON HOLD####
+#packages <- c("doBy", "psych", "beswarm", "ggplot", "reshape2", "scales")####
+#require(ggplot2) #Better to use 'require'
+#Import each origin .csv file excluding unnessesary rows and columns and export each as
+#'cleaned' dataset SECTION ON HOLD
 ##Something along the lines of Brian High's Example
 
 ##Upload .CSV export csv with headers and units corrected SECTION ON HOLD####
@@ -42,7 +43,7 @@ NP_ug
 
 ##Average concentrations by site - Arithmetic mean
 
-## Reduce number of metals to those with at least 10 greater than 2*Unc####
+## Reduce number of metals to those with at least 10 greater than 2*Unc
 
 grepl("Unc",names(X))
 metals.unc <- names(X)[grepl("Unc",names(X))]
@@ -77,7 +78,7 @@ file_locationPC2 <- c("C:/Users/KGH/OneDrive/Documents/Xuanwei/Xuanwei_ForAnalys
 #Xuanwei_ForAnalysis_31Mar15 <- read.csv(file_locationPC)
 #X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
 Xuanwei_ForAnalysis <- read.csv(file_locationPC2)
-X2<-subset(Xuanwei_ForAnalysis, village != "Xuanwei")
+X2<-subset(Xuanwei_ForAnalysis_Test, village != "Xuanwei")
 
 #Count number of observations per location type #Not sure if necessary anymore####
 #table(X$location)
@@ -90,45 +91,137 @@ library(doBy)
 
 #Create new objects, one for Home and one for Ambient
 ##Create new objects -> Mean of sites, points for plotting by location ####
-with(subset(X, location == "Home" & sitenum == 1), summary(conc)) #summaryBy way easuer
-am.site <- summaryBy(conc ~ sitenum + location + village, data=X2, id = NULL, keep.names=TRUE, FUN=mean)
+#with(subset(X, location == "Home" & sitenum == 1), summary(conc)) 
+am.site <- summaryBy(conc ~ sitenum + location + village, data=X2,
+                     id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE)
 am.site <- droplevels(am.site)
+
+am.site.NP <- summaryBy(X2NP_ugV + X2NFL_ugV + X1NP_ugV ~
+                            sitenum + location + village, data=X2,
+                        id = NULL, keep.names=TRUE, FUN=mean)
+am.site.NP <- droplevels(am.site.NP)
+
+am.site[,"inrank"] <- c(6,6,9,9,7,7,4,4,1,1,2,2,5,5,8,8,3,3)
 am.in.points <- subset(am.site, location == "Home")
 am.out.points <- subset(am.site, location == "Ambient")
+
 ##Points excluding the outlier sites 2,8####
-am.site.no.2.8 <- subset(am.site, sitenum != 2 & sitenum != 8)
-am.in.points.no.2.8 <- subset(am.site.no.2.8, location == "Home")
-am.out.points.no.2.8 <- subset(am.site.no.2.8, location == "Ambient")
+#am.site.no.2.8 <- subset(am.site, sitenum != 2 & sitenum != 8)
+#am.in.points.no.2.8 <- subset(am.site.no.2.8, location == "Home")
+#am.out.points.no.2.8 <- subset(am.site.no.2.8, location == "Ambient")
 
 
-summaryBy(conc ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
-summaryBy(2NP_ugV ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
-summaryBy( X2NP_ugV + X2NFL_ugV  +  X1NP_ugV  ~ sitenum + location, data=X2, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE)
-describeBy(X$conc, list(X$location, X$burn))
-describeBy(X$conc, list(X$location,X$sitenum))
+#summaryBy(conc ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
+#summaryBy(2NP_ugV ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
+#summaryBy( X2NP_ugV + X2NFL_ugV  +  X1NP_ugV  ~ sitenum + location, data=X2, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE)
+#describeBy(X$conc, list(X$location, X$burn))
+#describeBy(X$conc, list(X$location,X$sitenum))
 
 
 ##Plots of Conc by Site Differentiating Indoor and Outdoor 
 
-#Plot Arithmetic Mean (AM) of Indoor and Dup Samples by Site Showing NAAQS 24hr (35 ug/m3)####
-plot(conc~sitenum, data = am.site, type="n",log="y",ylab = expression(paste("Ambient Conc ",mu,"g/m^3","",sep ="")), xlab="",main="") #Why cannot control y range with ylim=c(0, 2000)?
-points(am.in.points[,"conc"],col=1,pch=19)
-points(am.out.points[,"conc"],col=8,pch=15)
+#Plot Arithmetic Mean (AM) of Indoor and Dup Samples by Site Showing 
+#NAAQS 24hr (35 ug/m3)####
+int <- order(am.in.points$conc)
+int_sorted <- am.in.points[int,]
+#plot(conc ~ as.factor(sitenum), data = int_sorted,
+#type="n",log="y",ylab = expression(paste("Concentration ",mu,"g/m^3","",
+#sep ="")), xlab="",main="") #Why cannot control y range with ylim=c(0, 2000)?
+
+
+plot(conc ~ inrank, data = am.site, type = "n", log="y",axes = FALSE,
+     frame.plot=TRUE,ylab =
+         expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
+     xlab="Site Number",main="")
+points(am.in.points$inrank,am.in.points$conc,col=1,pch=19)
+points(am.out.points$inrank,am.out.points$conc,col=8,pch=15)
+Axis(side=1, at = 1:9, labels=c(6,9,7,4,1,2,5,8,3))
+Axis(side=2, labels=TRUE)
 abline(h=35, lty=4, col=1)
-legend("topright", c("Indoor","Ambient","NAAQS 35 ug/m^3"),col=c(1,8,1),
+legend("topleft", c("Indoor","Outdoor","NAAQS 35 ug/m^3"),col=c(1,8,1),
        pch=c(19,15,NA),lty=c(NA,NA,4))
 
-#Boxplot of AM of Indoor and Dup Samples by Village Showing NAAQS 24hr (35 ug/m3)####
+#Boxplot of AM of Indoor and Dup Samples by Village Showing
+#NAAQS 24hr (35 ug/m3)####
 
 #install.packages('beeswarm')
 library(beeswarm)
-
-boxplot(conc~village, data=am.site, pch=19, ylab=expression(paste("Ambient Conc ",mu,"g/m^3","",sep ="")), main="", 
-        log="y", ylim=c(20,2000))
-beeswarm(conc~village, data=am.site, pch=19, pwcol=ifelse(location=="Home",1,8), log="TRUE", 
-         add=TRUE, ylim=c(20,2000))
+##Mass Conc
+boxplot(conc~village, data=am.site, pch=19,
+        ylab=expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
+        main="",xlab = "Village", log="y", ylim=c(20,2000))
+beeswarm(conc~village, data=am.site, pwpch=ifelse(location=="Home",19,15), pwcol=ifelse(location=="Home",1,8),
+         log="TRUE", add=TRUE, ylim=c(20,2000))
 abline(h=35, lty=4, col=1)
-legend("topright", c("Indoor", "Ambient","NAAQS 35 ug/m^3"), col=c(1,8), pch=c(19,15,NA),lty=c(NA,NA,4))
+legend("topright", c("Indoor", "Outdoor","NAAQS 35 ug/m^3"),
+       col=c(1,8), pch=c(19,15,NA),lty=c(NA,NA,4))
+
+##1NP
+###Faking the data, since you didn't provide any#### Example from online
+Gene <- data.frame(matrix(rweibull(100*4, 1), 100))
+names(Gene) <- paste0("Ind", 1:4)
+Gene <- rep(list(Gene), 4)
+
+# Setup the panels
+layout(t(1:3))
+par(oma=c(2, 4, 4, 0), mar=rep(1, 4), cex=1)
+# `mar` controls the space around each boxplot group
+
+# Calculating the range so that the panels are comparable
+my.ylim <- c(min(sapply(am.site.NP[,4:6], min, na.rm = TRUE)),
+             max(sapply(am.site.NP[,4:6], max, na.rm = TRUE)))
+
+# Plot all the boxes
+for(i in 4:6){
+    boxplot(am.site.NP[,i], ylim=my.ylim, axes=FALSE)
+    mtext(paste("", i), 1, 0)
+    if(i == 4){
+        axis(2, las=1)
+        mtext("Expression or what you have", 2, 3)
+    }
+}
+title("Look at all my genes!", outer=TRUE)
+
+###My attempt####
+#boxplot(am.site.NP[,4:6])
+#layout(t(1:3))
+#par(oma=c(2, 4, 4, 0), mar=rep(1, 4), cex=1)
+
+par(mfrow=c(1,3), mar = rep(1,3))
+
+boxplot(X1NP_ugV ~ village, data = am.site.NP, names, ylim=my.ylim,
+        at = c(0:2*3), pch=19, ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
+        log="y", xlab = "")
+boxplot(X2NP_ugV ~ village, data = am.site.NP, at = 0:2*3 + 1, pch=19,
+        ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
+        log="y")
+boxplot(X2NFL_ugV ~ village, data = am.site.NP, at = 0:2*4 + 2, pch=19,
+        ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
+        log="y")
+axis(1, at = 0:2*4 + 1.5, labels = colnames(am.site.NP), tick = TRUE)
+beeswarm(X2NP_ugV ~ village, data = am.site.NP, pch=19,
+         pwcol=ifelse(location=="Home",1,8), log="TRUE", add=TRUE)
+legend("topright", c("Indoor", "Ambient"), col=c(1,8), pch=c(19,15))
+
+bwplot(X1NP_ugV + X2NP_ugV + X2NFL_ugV ~ village, data = am.site.NP)
+
+##Boxplot of Nitro PAHS by Village using ggplot2####
+library(ggplot2)
+library(reshape2)
+library(scales)
+
+am.site.NP.m <- melt(am.site.NP, id.vars = c("sitenum", "location", "village"))
+
+bxp.NP <- ggplot(am.site.NP.m, aes(x=village, y=value))
+
+bwPalette <- c("#999999", "#CCCCCC", "#FFFFFF")
+
+bxp.NP + scale_y_continuous(trans=log10_trans()) + ylab(expression(
+    paste("Concentration ( ",mu,"g/m^3",")",sep =""))) + 
+    geom_boxplot(aes(fill = variable)) + theme_bw() +
+    scale_fill_manual(values=bwPalette, name = "Nitro PAH",
+                      labels = c("2-NP", "2-NFL","1-NP"))
+
 
 #Scatter plot of indoor vs outdoor####
 ##All sites
@@ -206,8 +299,6 @@ legend("topright", bty="O", legend=paste("R2 is",format(summary(lm_byloc.no28)$r
 #lines(lowess(gm_site$conc[gm_site$location=="Home"], gm_site$conc[gm_site$location=="Ambient"]),
       col="blue") # lowess line (x,y)
 
-
-
 ##Questionable code####
 #detach(X)
 #attach(X) #Try to refrain so no ambiguity or conflict after published
@@ -234,16 +325,16 @@ abline(h=median(am_avgmeans_x), lty=4, col=8)
 
 #Geometric Mean of Indoor and Dup Samples by Site Showing Geometric Mean and Median of Indoor and Ambient#### 
 
-plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
-     main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
-points(ho_gmeans_x,col=1,pch=19)
-points(am_gmeans_x,col=8,pch=15)
-legend("topright", c("Indoor", "GM","Median","Ambient", "GM", "Median"),col=c(1,1,1,8,8,8),
-       pch=c(19,NA,NA,15,NA,NA),lty=c(NA,1,5,NA,3,4))
-abline(h=mean(ho_gmeans_x), lty=1, col=1)
-abline(h=median(ho_gmeans_x), lty=5, col=1)
-abline(h=mean(am_gmeans_x), lty=3, col=8)
-abline(h=median(am_gmeans_x), lty=4, col=8)
+#plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
+#     main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
+#points(ho_gmeans_x,col=1,pch=19)
+#points(am_gmeans_x,col=8,pch=15)
+#legend("topright", c("Indoor", "GM","Median","Ambient", "GM", "Median"),col=c(1,1,1,8,8,8),
+#       pch=c(19,NA,NA,15,NA,NA),lty=c(NA,1,5,NA,3,4))
+#abline(h=mean(ho_gmeans_x), lty=1, col=1)
+#abline(h=median(ho_gmeans_x), lty=5, col=1)
+#abline(h=mean(am_gmeans_x), lty=3, col=8)
+#abline(h=median(am_gmeans_x), lty=4, col=8)
 
 #Plot of indoor/outdoor ratios
 ratio_site <- summaryBy(conc~location + sitenum, data=gm_site, id = "village", keep.names=TRUE, FUN=gm)
