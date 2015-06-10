@@ -1,163 +1,163 @@
-# - - - - - - - - - - - - - - - - - - - - - #
-# Packages Needed to Complete this Analysis #
-# - - - - - - - - - - - - - - - - - - - - - #
+#CURRENT WORKFLOW BELOW
+#Load Packages, Load and Subset Data####
 
-#packages <- c("doBy", "psych", "beswarm", "ggplot", "reshape2", "scales")####
-#require(ggplot2) #Better to use 'require'
-#Import each origin .csv file excluding unnessesary rows and columns and export each as
-#'cleaned' dataset SECTION ON HOLD
-##Something along the lines of Brian High's Example
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+# Packages Needed to Complete this Analysis                                    #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-##Upload .CSV export csv with headers and units corrected SECTION ON HOLD####
-###IMport and change headers
-####From Surface
-NP <- read.csv("C:/Users/KGH/OneDrive/Documents/Xuanwei/Files/Results/NP/NPAH_Final_Summary.csv")
-names(NP) <- c("name","filterID", "sampletype", "np_2np_pg", "np _2nfl_pg", "np_1np_pg", "np_2np_flag",
-               "np_2nfl_flag", "np_1np_flag")
-names(NP)
-View(NP)
-
-####From UW
-NP_pg <- read.csv("C:/Users/khartin/Desktop/NPAH_Final_Summary.csv") #Temporary need to finalize
-names(NP) <- c("name","filterID", "sampletype", "np_2np_pg", "np _2nfl_pg", "np_1np_pg", "np_2np_flag",
-               "np_2nfl_flag", "np_1np_flag")
-names(NP)
-View(NP)
-
-NP_ug
-
-###Correct COncentration
-
-#Merge files into single dataset by filter ID
-##Not sure how yet, something like coursera example
-
-
-#Standardize units - CURRENTLY CALCULATED IN EXCEL BEFORE EXPOSRTING
-##Apply same folrmulae as in Excel workbook
-
-##Check mass balance
-
-###Produce Table and Plot
-
-#Data reduction
-
-##Average concentrations by site - Arithmetic mean
-
-## Reduce number of metals to those with at least 10 greater than 2*Unc
-
-grepl("Unc",names(X))
-metals.unc <- names(X)[grepl("Unc",names(X))]
-
-v<-vector()
-
-for(i in 1:length(names(X))){
-  if(grepl("Unc",names(X)[i])){
-    if(sum(X[,i-1]>X[,i]*2)>10){
-      v<-c(v,paste(names(X)[i-1],"V",sep=""))
-    }
-  }
-}  
-##For names with "ConcV"
-#grepl("Conc",names(X))
-#var.names <- names(X)[grepl("ConcV",names(X))] ##Update column names
-
-#for loop AM of sites
-
-v<-c(v,names(X)[grepl("ugV",names(X))])
-
-this.formula <- as.character("conc~location + sitenum")  
-for (i in v){
-  this.formula <- paste(i,this.formula, sep = "+")
+pkg <- c("doBy", "psych", "beeswarm", "ggplot2", "reshape2", "scales")
+for (i in seq(length(pkg))) {
+    library(pkg[i], character.only = TRUE)
 }
 
-#Load dataset, exclude Xuanwei, view table - CURRENT WORKFLOW BELOW####
-##file_locationUW <- C("H:/Seto_Projects/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv") ##From UW
-#file_locationPC <- c("C:/Users/KGH/OneDrive/Documents/Xuanwei/Xuanwei_ForAnalysis_31Mar15.csv") ##From Surface
-file_locationPC2 <- c("C:/Users/KGH/OneDrive/Documents/Xuanwei/Xuanwei_ForAnalysis_Test.csv") ##From Surface
-##Xuanwei_ForAnalysis_31Mar15 <- read.csv(file_locationUW)
-#Xuanwei_ForAnalysis_31Mar15 <- read.csv(file_locationPC)
-#X<-subset(Xuanwei_ForAnalysis_31Mar15, village != "Xuanwei")
-Xuanwei_ForAnalysis <- read.csv(file_locationPC2)
-X2<-subset(Xuanwei_ForAnalysis_Test, village != "Xuanwei")
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#Load Dataset, Subset Excluding Xuanwei                                        #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-#Count number of observations per location type #Not sure if necessary anymore####
-#table(X$location)
-#with(X,table(Concentration = conc,  sitenum))
+##From UW
 
-#Summary By ####
-#install.packages("doBy")
-library(doBy)
-##Subset data by location and create mean of concentrations
+#file_UW <- c("C:/Users/khartin/Desktop/Xuanwei_ForAnalysis_Test.csv") 
+##X <- subset(read.csv(file_UW),village != "Xuanwei")
 
-#Create new objects, one for Home and one for Ambient
-##Create new objects -> Mean of sites, points for plotting by location ####
-#with(subset(X, location == "Home" & sitenum == 1), summary(conc)) 
-am.site <- summaryBy(conc ~ sitenum + location + village, data=X2,
-                     id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE)
-am.site <- droplevels(am.site)
+##From PC
 
-am.site.NP <- summaryBy(X2NP_ugV + X2NFL_ugV + X1NP_ugV ~
-                            sitenum + location + village, data=X2,
-                        id = NULL, keep.names=TRUE, FUN=mean)
-am.site.NP <- droplevels(am.site.NP)
+file_PC <- c("C:/Users/KGH/OneDrive/Documents/Xuanwei/air-comp/Xuanwei_ForAnalysis_Test.csv")
+X <- subset(read.csv(file_PC),village != "Xuanwei")
 
-am.site[,"inrank"] <- c(6,6,9,9,7,7,4,4,1,1,2,2,5,5,8,8,3,3)
-am.in.points <- subset(am.site, location == "Home")
-am.out.points <- subset(am.site, location == "Ambient")
+#Summary Stats ####
 
-##Points excluding the outlier sites 2,8####
-#am.site.no.2.8 <- subset(am.site, sitenum != 2 & sitenum != 8)
-#am.in.points.no.2.8 <- subset(am.site.no.2.8, location == "Home")
-#am.out.points.no.2.8 <- subset(am.site.no.2.8, location == "Ambient")
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#Summarize Data By Site, Location                                              #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
+##AM Conc of Components by Site, Location, Village
 
-#summaryBy(conc ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
-#summaryBy(2NP_ugV ~ sitenum + location, data=X, id = NULL, keep.names=TRUE, FUN=mean)
-#summaryBy( X2NP_ugV + X2NFL_ugV  +  X1NP_ugV  ~ sitenum + location, data=X2, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE)
-#describeBy(X$conc, list(X$location, X$burn))
-#describeBy(X$conc, list(X$location,X$sitenum))
+mass.site <- droplevels(
+    summaryBy(conc ~ sitenum + location + village, data=X,id = NULL, 
+              keep.names=TRUE, FUN=mean, na.rm = TRUE))
+levo.site <- droplevels(
+    summaryBy( Levo_ugV ~ sitenum + location + village, data=X, id = NULL, 
+               keep.names=TRUE, FUN=mean, na.rm = TRUE))
+nitro.site <- droplevels(
+    summaryBy( X1NP_ugV + X2NP_ugV + X2NFL_ugV ~ sitenum + location + village, 
+               data=X, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE))
+BaP.site <- droplevels(
+    summaryBy( Benzo.a.pyrene_ugV  ~ sitenum + location, data=X, id = NULL, 
+           keep.names=TRUE, FUN=mean, na.rm = TRUE))
+metals <- droplevels(
+    summaryBy( PbConcV + AsConcV + SeConcV  ~ sitenum + location, data=X, 
+               id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE))
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#Scatterplot Data By Site, Location                                            #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-##Plots of Conc by Site Differentiating Indoor and Outdoor 
+##AM Mass by Site Showing NAAQS 24hr (35 ug/m3)
 
-#Plot Arithmetic Mean (AM) of Indoor and Dup Samples by Site Showing 
-#NAAQS 24hr (35 ug/m3)####
-int <- order(am.in.points$conc)
-int_sorted <- am.in.points[int,]
-#plot(conc ~ as.factor(sitenum), data = int_sorted,
-#type="n",log="y",ylab = expression(paste("Concentration ",mu,"g/m^3","",
-#sep ="")), xlab="",main="") #Why cannot control y range with ylim=c(0, 2000)?
-
-
-plot(conc ~ inrank, data = am.site, type = "n", log="y",axes = FALSE,
+plot(conc ~ sitenum, data = mass.site, type = "n", log="y",axes = FALSE,
      frame.plot=TRUE,ylab =
          expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
      xlab="Site Number",main="")
-points(am.in.points$inrank,am.in.points$conc,col=1,pch=19)
-points(am.out.points$inrank,am.out.points$conc,col=8,pch=15)
-Axis(side=1, at = 1:9, labels=c(6,9,7,4,1,2,5,8,3))
+points(conc ~ sitenum,data = subset(mass.site, location == "Home"), 
+       col=1,pch=19)
+points(conc ~ sitenum,data = subset(mass.site, location == "Ambient"), 
+       col=8,pch=15)
+Axis(side=1, at = 1:9, labels=c(1:9))
+Axis(side=2, labels=TRUE)
+abline(h=35, lty=4, col=1)
+legend("topright", c("Indoor","Outdoor","NAAQS 35 ug/m^3"),col=c(1,8,1),
+       pch=c(19,15,NA),lty=c(NA,NA,4))
+
+##AM Mass by Site Showing NAAQS 24hr (35 ug/m3), Arranged by Indoor Conc
+
+mass.site[,"inrank"] <- c(6,6,9,9,7,7,4,4,1,1,2,2,5,5,8,8,3,3)
+mass.in.points <- subset(mass.site, location == "Home")
+mass.out.points <- subset(mass.site, location == "Ambient")
+int <- order(mass.in.points$conc)
+int_sorted <- mass.in.points[int,]
+
+plot(conc ~ inrank, data = mass.site, type = "n", log="y",axes = FALSE,
+     frame.plot=TRUE,ylab =
+         expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
+     xlab="Site Number",main="")
+points(mass.in.points$inrank,mass.in.points$conc,col=1,pch=19)
+points(mass.out.points$inrank,mass.out.points$conc,col=8,pch=15)
+Axis(side=1, at = 1:9, labels=c(5,6,9,4,7,1,3,8,2))
 Axis(side=2, labels=TRUE)
 abline(h=35, lty=4, col=1)
 legend("topleft", c("Indoor","Outdoor","NAAQS 35 ug/m^3"),col=c(1,8,1),
        pch=c(19,15,NA),lty=c(NA,NA,4))
 
-#Boxplot of AM of Indoor and Dup Samples by Village Showing
-#NAAQS 24hr (35 ug/m3)####
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#Boxplots by Village                                                           #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-#install.packages('beeswarm')
-library(beeswarm)
-##Mass Conc
-boxplot(conc~village, data=am.site, pch=19,
+##Boxplots
+
+###Mass by Village with NAAQS 24hr (35 ug/m3)####
+
+boxplot(conc~village, data=mass.site, pch=19,
         ylab=expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
         main="",xlab = "Village", log="y", ylim=c(20,2000))
-beeswarm(conc~village, data=am.site, pwpch=ifelse(location=="Home",19,15), pwcol=ifelse(location=="Home",1,8),
-         log="TRUE", add=TRUE, ylim=c(20,2000))
+beeswarm(conc~village, data=am.site, pwpch=ifelse(location=="Home",19,15), 
+         pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE, 
+         ylim=c(20,2000))
 abline(h=35, lty=4, col=1)
 legend("topright", c("Indoor", "Outdoor","NAAQS 35 ug/m^3"),
        col=c(1,8), pch=c(19,15,NA),lty=c(NA,NA,4))
 
-##1NP
-###Faking the data, since you didn't provide any#### Example from online
+###Levo by Village
+boxplot(Levo_ugV ~village, data=levo.site, pch=19,
+        ylab=expression(paste("Levoglucosan ( ",mu,"g/m^3",")",sep ="")),
+        main="",xlab = "Village", log="y")
+beeswarm(Levo_ugV~village, data=levo.site, pwpch=ifelse(location=="Home",19,15), 
+         pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE)
+legend("topright", c("Indoor", "Outdoor"),
+       col=c(1,8), pch=c(19,15))
+
+###Nitro-PAH by Village, Native Plot
+
+par(mfrow=c(1,3))
+
+boxplot(X1NP_ugV ~ village, data=nitro.site, pch=19,
+        ylab=expression(paste("1-NP ( ",mu,"g/m^3",")",sep ="")),
+        main="", log="y", ylim=c(2e-05,2e-02))
+beeswarm(X1NP_ugV ~ village, data=nitro.site, 
+         pwpch=ifelse(location=="Home",19,15), 
+         pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE, 
+         ylim=c(2e-05,2e-02))
+
+boxplot(X2NP_ugV ~ village, data=nitro.site, pch=19,
+        ylab=expression(paste("2-NP ( ",mu,"g/m^3",")",sep ="")),
+        main="",xlab = "Village", log="y", ylim=c(2e-05,2e-02))
+beeswarm(X2NP_ugV ~ village, data=nitro.site, 
+         pwpch=ifelse(location=="Home",19,15), 
+         pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE, 
+         ylim=c(2e-05,2e-02))
+
+boxplot(X2NFL_ugV ~ village, data=nitro.site, pch=19,
+        ylab=expression(paste("2-NFL ( ",mu,"g/m^3",")",sep ="")),
+        main="", log="y", ylim=c(2e-05,2e-02))
+beeswarm(X2NFL_ugV ~ village, data=nitro.site, 
+         pwpch=ifelse(location=="Home",19,15), 
+         pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE, 
+         ylim=c(2e-05,2e-02))
+legend("topright", c("Indoor", "Outdoor"),
+       col=c(1,8), pch=c(19,15))
+
+###Nitro-PAH by Village, GG Plot
+
+am.nitro.m <- melt(nitro.site, id.vars = c("sitenum", "location", "village"))
+bxp.NP <- ggplot(am.nitro.m, aes(x=village, y=value))
+bwPalette <- c("#999999", "#CCCCCC", "#FFFFFF")
+
+bxp.NP + scale_y_continuous(trans=log10_trans()) + ylab(expression(
+    paste("Concentration ( ",mu,"g/m^3",")",sep =""))) + 
+    geom_boxplot(aes(fill = variable)) + theme_bw() +
+    scale_fill_manual(values=bwPalette, name = "Nitro PAH",
+                      labels = c("2-NP", "2-NFL","1-NP"))
+
+###Faking the data, since you didn't provide any####
 Gene <- data.frame(matrix(rweibull(100*4, 1), 100))
 names(Gene) <- paste0("Ind", 1:4)
 Gene <- rep(list(Gene), 4)
@@ -210,9 +210,9 @@ library(ggplot2)
 library(reshape2)
 library(scales)
 
-am.site.NP.m <- melt(am.site.NP, id.vars = c("sitenum", "location", "village"))
+am.nitro.m <- melt(nitro.site, id.vars = c("sitenum", "location", "village"))
 
-bxp.NP <- ggplot(am.site.NP.m, aes(x=village, y=value))
+bxp.NP <- ggplot(am.nitro.m, aes(x=village, y=value))
 
 bwPalette <- c("#999999", "#CCCCCC", "#FFFFFF")
 
@@ -299,6 +299,19 @@ legend("topright", bty="O", legend=paste("R2 is",format(summary(lm_byloc.no28)$r
 #lines(lowess(gm_site$conc[gm_site$location=="Home"], gm_site$conc[gm_site$location=="Ambient"]),
       col="blue") # lowess line (x,y)
 
+#Scatter plot of indoor by sample period ####
+
+plot(X$conc ~ X$sitenum, type="n", log="y",ylab = expression(paste("Concentration ( ",mu,"g/m^3",
+                                             ")",sep ="")),
+     xlab="Site Number",main="")
+points(am.in.points$inrank,am.in.points$conc,col=1,pch=19)
+points(am.out.points$inrank,am.out.points$conc,col=8,pch=15)
+Axis(side=1, at = 1:9, labels=c(6,9,7,4,1,2,5,8,3))
+Axis(side=2, labels=TRUE)
+abline(h=35, lty=4, col=1)
+legend("topleft", c("Indoor","Outdoor","NAAQS 35 ug/m^3"),col=c(1,8,1),
+       pch=c(19,15,NA),lty=c(NA,NA,4))
+
 ##Questionable code####
 #detach(X)
 #attach(X) #Try to refrain so no ambiguity or conflict after published
@@ -314,7 +327,7 @@ legend("topright", bty="O", legend=paste("R2 is",format(summary(lm_byloc.no28)$r
 
 plot(conc~sitenum, type="n",log="y",ylab="Concentration ug/m^3", xlab="Site Number",
      main="PM2.5 Concentration by Site") #Why cannot control y range with ylim=c(0, 2000)?
-points(ho_avgmeans_x,col=1,pch=19)
+points(X$conc[,X$samper == "Night"],col=1,pch=19)
 points(am_avgmeans_x,col=8,pch=15)
 legend("topright", c("Indoor", "Mean","Median","Ambient", "Mean", "Median"),col=c(1,1,1,8,8,8),
        pch=c(19,NA,NA,15,NA,NA),lty=c(NA,1,5,NA,3,4))
@@ -344,3 +357,81 @@ ratio_site <- summaryBy(conc~location + sitenum, data=gm_site, id = "village", k
 #install.packages('car')
 #library(car)
 #scatterplot(conc~sitenum | location, data=gm_site)
+
+#Import each origin .csv file excluding unnessesary rows and columns and export each as
+#'cleaned' dataset SECTION ON HOLD
+##Something along the lines of Brian High's Example
+
+##Subset data by location and create mean of concentrations
+
+#Create new objects, one for Home and one for Ambient
+##Create new objects -> Mean of sites, points for plotting by location ####
+#with(subset(X, location == "Home" & sitenum == 1), summary(conc)) 
+
+
+##Upload .CSV export csv with headers and units corrected SECTION ON HOLD####
+###IMport and change headers
+####From Surface
+NP <- read.csv("C:/Users/KGH/OneDrive/Documents/Xuanwei/Files/Results/NP/NPAH_Final_Summary.csv")
+names(NP) <- c("name","filterID", "sampletype", "np_2np_pg", "np _2nfl_pg", "np_1np_pg", "np_2np_flag",
+               "np_2nfl_flag", "np_1np_flag")
+names(NP)
+View(NP)
+
+####From UW
+NP_pg <- read.csv("C:/Users/khartin/Desktop/NPAH_Final_Summary.csv") #Temporary need to finalize
+names(NP) <- c("name","filterID", "sampletype", "np_2np_pg", "np _2nfl_pg", "np_1np_pg", "np_2np_flag",
+               "np_2nfl_flag", "np_1np_flag")
+names(NP)
+View(NP)
+
+NP_ug
+
+###Correct Concentration
+
+#Merge files into single dataset by filter ID
+##Not sure how yet, something like coursera example
+
+
+#Standardize units - CURRENTLY CALCULATED IN EXCEL BEFORE EXPOSRTING
+##Apply same folrmulae as in Excel workbook
+
+##Check mass balance
+
+###Produce Table and Plot
+
+#Data reduction
+
+##Average concentrations by site - Arithmetic mean
+
+## Reduce number of metals to those with at least 10 greater than 2*Unc
+
+grepl("Unc",names(X))
+metals.unc <- names(X)[grepl("Unc",names(X))]
+
+v<-vector()
+
+for(i in 1:length(names(X))){
+    if(grepl("Unc",names(X)[i])){
+        if(sum(X[,i-1]>X[,i]*2)>10){
+            v<-c(v,paste(names(X)[i-1],"V",sep=""))
+        }
+    }
+}  
+##For names with "ConcV"
+#grepl("Conc",names(X))
+#var.names <- names(X)[grepl("ConcV",names(X))] ##Update column names
+
+#for loop AM of sites
+
+v<-c(v,names(X)[grepl("ugV",names(X))])
+
+this.formula <- as.character("conc~location + sitenum")  
+for (i in v){
+    this.formula <- paste(i,this.formula, sep = "+")
+}
+
+##Points excluding the outlier sites 2,8####
+#am.site.no.2.8 <- subset(am.site, sitenum != 2 & sitenum != 8)
+#am.in.points.no.2.8 <- subset(am.site.no.2.8, location == "Home")
+#am.out.points.no.2.8 <- subset(am.site.no.2.8, location == "Ambient")
