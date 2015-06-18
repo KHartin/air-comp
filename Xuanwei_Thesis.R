@@ -25,7 +25,6 @@ file_PC <- c("C:/Users/KGH/OneDrive/Documents/Xuanwei/air-comp/Xuanwei_ForAnalys
 X <- subset(read.csv(file_PC),village != "Xuanwei")
 
 #Summary Stats ####
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #Summarize Data By Site, Location                                              #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
@@ -35,19 +34,44 @@ X <- subset(read.csv(file_PC),village != "Xuanwei")
 mass.site <- droplevels(
     summaryBy(conc ~ sitenum + location + village, data=X,id = NULL, 
               keep.names=TRUE, FUN=mean, na.rm = TRUE))
+mass.site.table <- mass.site
+mass.site.table[,4] <- round(mass.site.table[,4],0)
+colnames(mass.site.table) <- c("Site Number", "Compartment", "Village", 
+                               "Mass Conc")
+mass.site.table
+
 levo.site <- droplevels(
     summaryBy( Levo_ugV ~ sitenum + location + village, data=X, id = NULL, 
                keep.names=TRUE, FUN=mean, na.rm = TRUE))
+levo.site.table <- levo.site
+levo.site.table[,4] <- round(levo.site.table[,4],5)
+colnames(levo.site.table) <- c("Site Number", "Compartment", "Village", 
+                               "Levo Conc")
+levo.site.table
+
 nitro.site <- droplevels(
     summaryBy( X1NP_ugV + X2NP_ugV + X2NFL_ugV ~ sitenum + location + village, 
                data=X, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE))
+nitro.site.table <- nitro.site
+nitro.site.table[,4:6] <- round(nitro.site.table[,4:6],6)
+colnames(nitro.site.table) <- c("Site Number", "Compartment", "Village", 
+                               "1NP Conc", "2NP Conc", "2NFL Conc")
+nitro.site.table
+
 BaP.site <- droplevels(
-    summaryBy( Benzo.a.pyrene_ugV  ~ sitenum + location, data=X, id = NULL, 
-           keep.names=TRUE, FUN=mean, na.rm = TRUE))
+    summaryBy( Benzo.a.pyrene_ugV  ~ sitenum + location + village, 
+               data=X, id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE))
+BaP.site.table <- BaP.site
+BaP.site.table[,4] <- round(BaP.site.table[,4],4)
+colnames(BaP.site.table) <- c("Site Number", "Compartment", "Village", 
+                                "BaP Conc")
+BaP.site.table
+
 metals <- droplevels(
     summaryBy( PbConcV + AsConcV + SeConcV  ~ sitenum + location, data=X, 
                id = NULL, keep.names=TRUE, FUN=mean, na.rm = TRUE))
 
+#Scatterplots####
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #Scatterplot Data By Site, Location                                            #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
@@ -88,26 +112,26 @@ abline(h=35, lty=4, col=1)
 legend("topleft", c("Indoor","Outdoor","NAAQS 35 ug/m^3"),col=c(1,8,1),
        pch=c(19,15,NA),lty=c(NA,NA,4))
 
+#Boxplots####
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 #Boxplots by Village                                                           #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-##Boxplots
+##Mass with NAAQS 24hr (35 ug/m3)
 
-###Mass by Village with NAAQS 24hr (35 ug/m3)####
-
-boxplot(conc~village, data=mass.site, pch=19,
-        ylab=expression(paste("Concentration ( ",mu,"g/m^3",")",sep ="")),
+boxplot(conc ~ village, data=mass.site, pch=19,
+        ylab=expression(paste("PM2.5 ( ",mu,"g/m^3",")",sep ="")),
         main="",xlab = "Village", log="y", ylim=c(20,2000))
-beeswarm(conc~village, data=am.site, pwpch=ifelse(location=="Home",19,15), 
+beeswarm(conc~village, data=mass.site, pwpch=ifelse(location=="Home",19,15), 
          pwcol=ifelse(location=="Home",1,8),log="TRUE", add=TRUE, 
          ylim=c(20,2000))
 abline(h=35, lty=4, col=1)
 legend("topright", c("Indoor", "Outdoor","NAAQS 35 ug/m^3"),
        col=c(1,8), pch=c(19,15,NA),lty=c(NA,NA,4))
 
-###Levo by Village
-boxplot(Levo_ugV ~village, data=levo.site, pch=19,
+###Levoglucosan
+
+boxplot(Levo_ugV ~ village, data=levo.site, pch=19,
         ylab=expression(paste("Levoglucosan ( ",mu,"g/m^3",")",sep ="")),
         main="",xlab = "Village", log="y")
 beeswarm(Levo_ugV~village, data=levo.site, pwpch=ifelse(location=="Home",19,15), 
@@ -115,7 +139,18 @@ beeswarm(Levo_ugV~village, data=levo.site, pwpch=ifelse(location=="Home",19,15),
 legend("topright", c("Indoor", "Outdoor"),
        col=c(1,8), pch=c(19,15))
 
-###Nitro-PAH by Village, Native Plot
+###Benzo[a]pyrene
+
+boxplot(Benzo.a.pyrene_ugV ~ village, data=BaP.site, pch=19,
+        ylab=expression(paste("Benzo[a]pyrene ( ",mu,"g/m^3",")",sep ="")),
+        main="",xlab = "Village", log="y")
+beeswarm(Benzo.a.pyrene_ugV ~ village, data=BaP.site, pwpch=ifelse(
+    location=="Home",19,15), pwcol=ifelse(location=="Home",1,8),
+    log="TRUE", add=TRUE)
+legend("topright", c("Indoor", "Outdoor"),
+       col=c(1,8), pch=c(19,15))
+
+###Nitro-PAH, Native Plot
 
 par(mfrow=c(1,3))
 
@@ -157,30 +192,29 @@ bxp.NP + scale_y_continuous(trans=log10_trans()) + ylab(expression(
     scale_fill_manual(values=bwPalette, name = "Nitro PAH",
                       labels = c("2-NP", "2-NFL","1-NP"))
 
-###Faking the data, since you didn't provide any####
-Gene <- data.frame(matrix(rweibull(100*4, 1), 100))
-names(Gene) <- paste0("Ind", 1:4)
-Gene <- rep(list(Gene), 4)
+##Correlation####
+x <- subset(mass.site, location == "Home")
+y <- subset(mass.site, location == "Ambient")
+w <- wilcox.test(x$conc,y$conc, paired = TRUE, alternative = "greater")
 
-# Setup the panels
-layout(t(1:3))
-par(oma=c(2, 4, 4, 0), mar=rep(1, 4), cex=1)
-# `mar` controls the space around each boxplot group
+x <- subset(mass.site, location == "Home")
+y <- subset(mass.site, location == "Ambient")
+wilcox.test(x$conc,y$conc, paired = FALSE, alternative = "greater")
 
-# Calculating the range so that the panels are comparable
-my.ylim <- c(min(sapply(am.site.NP[,4:6], min, na.rm = TRUE)),
-             max(sapply(am.site.NP[,4:6], max, na.rm = TRUE)))
+kruskal.test(conc ~ location, data = mass.site)
+kruskal.test(conc ~ village, data = mass.site)
 
-# Plot all the boxes
-for(i in 4:6){
-    boxplot(am.site.NP[,i], ylim=my.ylim, axes=FALSE)
-    mtext(paste("", i), 1, 0)
-    if(i == 4){
-        axis(2, las=1)
-        mtext("Expression or what you have", 2, 3)
-    }
-}
-title("Look at all my genes!", outer=TRUE)
+x <- subset(levo.site, location == "Home")
+y <- subset(levo.site, location == "Ambient")
+wilcox.test(x$Levo_ugV,y$Levo_ugV, paired = TRUE, alternative = "greater")
+
+x <- subset(nitro.site, location == "Home")
+y <- subset(nitro.site, location == "Ambient")
+wilcox.test(x$X1NP_ugV,y$X1NP_ugV, paired = TRUE, alternative = "greater")
+
+x <- subset(BaP.site, location == "Home")
+y <- subset(BaP.site, location == "Ambient")
+wilcox.test(x$Benzo.a.pyrene_ugV,y$Benzo.a.pyrene_ugV, paired = TRUE, alternative = "greater")
 
 ###My attempt####
 #boxplot(am.site.NP[,4:6])
@@ -206,9 +240,7 @@ legend("topright", c("Indoor", "Ambient"), col=c(1,8), pch=c(19,15))
 bwplot(X1NP_ugV + X2NP_ugV + X2NFL_ugV ~ village, data = am.site.NP)
 
 ##Boxplot of Nitro PAHS by Village using ggplot2####
-library(ggplot2)
-library(reshape2)
-library(scales)
+
 
 am.nitro.m <- melt(nitro.site, id.vars = c("sitenum", "location", "village"))
 
@@ -435,3 +467,28 @@ for (i in v){
 #am.site.no.2.8 <- subset(am.site, sitenum != 2 & sitenum != 8)
 #am.in.points.no.2.8 <- subset(am.site.no.2.8, location == "Home")
 #am.out.points.no.2.8 <- subset(am.site.no.2.8, location == "Ambient")
+
+###Faking the data, since you didn't provide any####
+Gene <- data.frame(matrix(rweibull(100*4, 1), 100))
+names(Gene) <- paste0("Ind", 1:4)
+Gene <- rep(list(Gene), 4)
+
+# Setup the panels
+layout(t(1:3))
+par(oma=c(2, 4, 4, 0), mar=rep(1, 4), cex=1)
+# `mar` controls the space around each boxplot group
+
+# Calculating the range so that the panels are comparable
+my.ylim <- c(min(sapply(am.site.NP[,4:6], min, na.rm = TRUE)),
+             max(sapply(am.site.NP[,4:6], max, na.rm = TRUE)))
+
+# Plot all the boxes
+for(i in 4:6){
+    boxplot(am.site.NP[,i], ylim=my.ylim, axes=FALSE)
+    mtext(paste("", i), 1, 0)
+    if(i == 4){
+        axis(2, las=1)
+        mtext("Expression or what you have", 2, 3)
+    }
+}
+title("Look at all my genes!", outer=TRUE)
