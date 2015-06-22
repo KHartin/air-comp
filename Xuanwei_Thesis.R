@@ -180,6 +180,8 @@ beeswarm(X2NFL_ugV ~ village, data=nitro.site,
 legend("topright", c("Indoor", "Outdoor"),
        col=c(1,8), pch=c(19,15))
 
+par(mfrow=c(1,1))
+
 ###Nitro-PAH by Village, GG Plot
 
 am.nitro.m <- melt(nitro.site, id.vars = c("sitenum", "location", "village"))
@@ -187,75 +189,69 @@ bxp.NP <- ggplot(am.nitro.m, aes(x=village, y=value))
 bwPalette <- c("#999999", "#CCCCCC", "#FFFFFF")
 
 bxp.NP + scale_y_continuous(trans=log10_trans()) + ylab(expression(
-    paste("Concentration ( ",mu,"g/m^3",")",sep =""))) + 
+    paste("Concentration ( ",mu,"g/m^3",")",sep =""))) + xlab("Village") +
     geom_boxplot(aes(fill = variable)) + theme_bw() +
     scale_fill_manual(values=bwPalette, name = "Nitro PAH",
                       labels = c("2-NP", "2-NFL","1-NP"))
 
-##Correlation####
-x <- subset(mass.site, location == "Home")
-y <- subset(mass.site, location == "Ambient")
-w <- wilcox.test(x$conc,y$conc, paired = TRUE, alternative = "greater")
+#Correlation####
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
+#Correlation between Indoor / Outdoor Concentrations                           #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -#
 
-x <- subset(mass.site, location == "Home")
-y <- subset(mass.site, location == "Ambient")
-wilcox.test(x$conc,y$conc, paired = FALSE, alternative = "greater")
+##Wilcox / Mann-Whitney Test
 
-kruskal.test(conc ~ location, data = mass.site)
-kruskal.test(conc ~ village, data = mass.site)
+###Mass
+in.mass <- subset(mass.site, location == "Home")
+out.mass <- subset(mass.site, location == "Ambient")
+mass.wilcox <- wilcox.test(in.mass$conc,out.mass$conc, paired = FALSE)
+wilcox2 <- wilcox.test(in.mass$conc,out.mass$conc, paired = FALSE, 
+                      alternative = "greater")
 
-x <- subset(levo.site, location == "Home")
-y <- subset(levo.site, location == "Ambient")
-wilcox.test(x$Levo_ugV,y$Levo_ugV, paired = TRUE, alternative = "greater")
+###Levoglucosan
+in.levo <- subset(levo.site, location == "Home")
+out.levo <- subset(levo.site, location == "Ambient")
+levo.wilcox <- wilcox.test(in.levo$Levo_ugV,out.levo$Levo_ugV, paired = FALSE)
 
-x <- subset(nitro.site, location == "Home")
-y <- subset(nitro.site, location == "Ambient")
-wilcox.test(x$X1NP_ugV,y$X1NP_ugV, paired = TRUE, alternative = "greater")
+###1-Nitropyrene
+in.nitro <- subset(nitro.site, location == "Home")
+out.nitro <- subset(nitro.site, location == "Ambient")
+NP1.wilcox <- wilcox.test(in.nitro$X1NP_ugV,out.nitro$X1NP_ugV, paired = FALSE)
 
-x <- subset(BaP.site, location == "Home")
-y <- subset(BaP.site, location == "Ambient")
-wilcox.test(x$Benzo.a.pyrene_ugV,y$Benzo.a.pyrene_ugV, paired = TRUE, alternative = "greater")
+###Benzo[A]pyrene
+in.BaP <- subset(BaP.site, location == "Home")
+out.BaP <- subset(BaP.site, location == "Ambient")
+BaP.wilcox <- wilcox.test(in.BaP$Benzo.a.pyrene_ugV,out.BaP$Benzo.a.pyrene_ugV, 
+                          paired = FALSE)
 
-###My attempt####
-#boxplot(am.site.NP[,4:6])
-#layout(t(1:3))
-#par(oma=c(2, 4, 4, 0), mar=rep(1, 4), cex=1)
+##Plot of Wilcox test stats
+wilcox.stats <- c(mass.wilcox$p.value, levo.wilcox$p.value, 
+                         NP1.wilcox$p.value,BaP.wilcox$p.value) 
+labels (wilcox.stats,c("Mass", "Levo", "1-NP", "BaP"))
+plot(wilcox.stats, type = "n",axes = FALSE,
+     frame.plot=TRUE,ylab = "P Value", xlab="Component",main="")
+points(wilcox.stats)
+Axis(side=1, at = 1:4, labels=c("Mass", "Levo", "1-NP", "BaP"))
+Axis(side=2, labels=TRUE)
 
-par(mfrow=c(1,3), mar = rep(1,3))
+##Kruskal-Wallis Test
 
-boxplot(X1NP_ugV ~ village, data = am.site.NP, names, ylim=my.ylim,
-        at = c(0:2*3), pch=19, ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
-        log="y", xlab = "")
-boxplot(X2NP_ugV ~ village, data = am.site.NP, at = 0:2*3 + 1, pch=19,
-        ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
-        log="y")
-boxplot(X2NFL_ugV ~ village, data = am.site.NP, at = 0:2*4 + 2, pch=19,
-        ylab=expression(paste("Conc ",mu,"g/m^3","",sep ="")), main="", 
-        log="y")
-axis(1, at = 0:2*4 + 1.5, labels = colnames(am.site.NP), tick = TRUE)
-beeswarm(X2NP_ugV ~ village, data = am.site.NP, pch=19,
-         pwcol=ifelse(location=="Home",1,8), log="TRUE", add=TRUE)
-legend("topright", c("Indoor", "Ambient"), col=c(1,8), pch=c(19,15))
+###Mass
+mass.kw <- kruskal.test(conc ~ location, data = mass.site)
 
-bwplot(X1NP_ugV + X2NP_ugV + X2NFL_ugV ~ village, data = am.site.NP)
+###Levoglucosan
+levo.kw <- kruskal.test(Levo_ugV ~ location, data = levo.site)
 
-##Boxplot of Nitro PAHS by Village using ggplot2####
+###1-Nitropyrene
+1np.kw <- kruskal.test(X1NP_ugV ~ location, data = nitro.site)
 
+###Benzo[A]pyrene
+BaP.kw <- kruskal.test(Benzo.a.pyrene_ugV ~ location, data = BaP.site)
 
-am.nitro.m <- melt(nitro.site, id.vars = c("sitenum", "location", "village"))
+#Linear Regression####
 
-bxp.NP <- ggplot(am.nitro.m, aes(x=village, y=value))
+#Scatter plot of indoor vs outdoor
 
-bwPalette <- c("#999999", "#CCCCCC", "#FFFFFF")
-
-bxp.NP + scale_y_continuous(trans=log10_trans()) + ylab(expression(
-    paste("Concentration ( ",mu,"g/m^3",")",sep =""))) + 
-    geom_boxplot(aes(fill = variable)) + theme_bw() +
-    scale_fill_manual(values=bwPalette, name = "Nitro PAH",
-                      labels = c("2-NP", "2-NFL","1-NP"))
-
-
-#Scatter plot of indoor vs outdoor####
 ##All sites
 lm_byloc <- lm(am.out.points[,"conc"]~am.in.points[,"conc"])
 ###Summary details
