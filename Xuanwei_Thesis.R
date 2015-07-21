@@ -15,7 +15,11 @@ setwd("C:/Users/KGH/OneDrive/Documents/Xuanwei/Files/Results")
 
 wd <- getwd()
 
-pkg <- c("doBy", "ggplot2", "reshape2", "beeswarm") #"psych", "beeswarm", "scales")
+##From GitHub
+
+final <- read.csv(text=getURL("https://raw.githubusercontent.com/KHartin/air-comp/master/XuanweiForAnalysis.csv"))
+
+pkg <- c("doBy", "ggplot2", "reshape2", "beeswarm", "RCurl") #"psych", "beeswarm", "scales")
 for (i in seq(length(pkg))) {
     library(pkg[i], character.only = TRUE)
 }

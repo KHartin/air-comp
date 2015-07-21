@@ -91,6 +91,7 @@ grav_lg$LgMass.ug.m3 <- ToConcentration(grav_lg$LgMass.ug, 3)
 
 grav_lg$LgMass.ug.m3.LOQ <- ToConcentration(grav_lg$LgMass.ug.LOQ, 3)
 
+
 ##Nitro PAH####
 ###Import Nitro PAH Results, Exclude Columns, Change Column Names
 
@@ -273,10 +274,9 @@ for(i in 164:211) {
     k=k+1
 }
 
-###Export ALL COMPONENT CONCENTRATION .CSV
+###Export merge of all component concentrations file
 
-write.csv(metals.by.slv, file = "metals_compile.csv")
-
+write.csv(glnp_xrf, file = "Xuanwei_AllComponents.csv", row.names = FALSE)
 
 ###Identify Metals with 2/3 of Samples Above 2 * Uncertainty####
 
@@ -330,4 +330,4 @@ glnp_xrf.cols.dont.want <- c("Mg.ngcm2", "Mg.Unc", "Al.ngcm2", "Al.Unc",
 final <- glnp_xrf[, ! names(glnp_xrf) %in% glnp_xrf.cols.dont.want, drop = F]
 
 
-write.csv(metals.by.slv, file = "metals_compile.csv")
+write.csv(final, file = "XuanweiForAnalysis.csv", row.names = FALSE)
